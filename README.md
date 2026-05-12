@@ -1,6 +1,6 @@
 # region_fill
 
-We've explored a few different ways to construct and/or fill ROIs with cells - both 2D and 3D, over the years. For the HuBMAP project, we were given .svg ROI geometries, whose boundaries were piecewise Bezier, and we ended up doing a scanline-style, hex-filled ROIs. And of course PhysiCell Studio offers simple hex-filled geometries also.
+We've explored a few different ways to construct and/or fill ROIs with cells - both 2D and 3D, over the years. For the HuBMAP project, we were given .svg ROI geometries, whose boundaries were piecewise Bezier curves, and we ended up doing a scanline-style, hex-filled ROIs. And of course PhysiCell Studio offers simple hex-filled geometries also. We also explored various [level set approaches](https://github.com/rheiland/kidney_level_sets) for some of the HuBMAP data.
 
 This repo demonstrates another simple approach to handling "voids" in a 2-D PhysiCell model. These voids may be coming from a segmented image or just a purely synthetic void. We assume a polygon can be provided that represents the void(s) boundary and a "centroid" cell (guaranteed to lie inside the polygon) for each void. We use PhysiCell to perform region-growing - starting with the centroid cell(s), proliferate, so long as daughter cells remain inside the polygon. When daughter cells step outside a void's polygonal boundary, they apoptose. At some point, either in post-processing or using another rule, we would want to make the cells, filling the voids, immovable (and experiment with their mechanical repulsion for additional cells that would be colliding with the void).
 
@@ -11,10 +11,15 @@ The next version of the model might be to fuse "inner" cells to reduce the numbe
 $ python polygon_boundaries3.py concave.png
 ```
 
-To compile the initial model, in the 1.14.2 dir:
+To compile the initial model, in the 1.14.2 directory:
 ```
 $ make load PROJ=region_fill__model0
 $ make
+
+# Note that this model currently just uses a couple of rules:
+barrier0,pressure,decreases,cycle entry,0.0002,2,4,0
+barrier0,custom:inside,decreases,apoptosis,0.0,0.5,8,0
+
 $ project   # we used the Studio to render results
 ```
 
